@@ -1,0 +1,13 @@
+__pycache__
+*.pyc
+.git
+venv
+.venv
+resultados*
+*.md
+.env
+.env.*
+*.pem
+*.key
+r_*u*.csv
+r_*u*.html
