@@ -1,9 +1,10 @@
 # RELATÓRIO — PRÁTICA 1: DOCKER & DEPLOY PaaS (máx. 2 páginas)
 
 **Disciplina:** Sistemas Distribuídos — IFPA Campus Ananindeua
-**Equipe:** [Nome 1], [Nome 2], [Nome 3]
-**Repositório:** https://github.com/[usuario]/sd-loadlab
-**URL pública:** https://[servico].onrender.com
+**Equipe:** Ian Lucas Lobato Barra da Silva e Leonardo Jacomini Barcos
+**Repositório:** https://github.com/percerval/sd-loadlab
+**URL pública:** https://sd-loadlab.onrender.com
+**Data da execução:** 01/10/2026
 
 ## 1. Objetivo
 Conteinerizar uma API REST em Python e publicá-la em uma plataforma PaaS, tornando-a acessível por uma URL pública.
@@ -18,21 +19,35 @@ API SD LoadLab desenvolvida em Flask com quatro endpoints: `/` (health check), `
 - **Porta via variável `PORT`:** o PaaS define a porta em tempo de execução; o container se adapta.
 - **`.dockerignore`:** evita copiar arquivos desnecessários para a imagem.
 
-[INSERIR PRINT: `docker build` / `docker run` local funcionando]
+As Figuras 1 e 2 documentam o build concluído e a resposta HTTP do container local.
 
 ## 4. Deploy na plataforma PaaS (Render)
-*Confirmar esta seção após executar o deploy; os passos abaixo descrevem o procedimento previsto.*
+O código foi versionado e publicado no GitHub. No Render, o serviço foi construído pelo Dockerfile e disponibilizado com HTTPS. O log registrou **“Your service is live” em 01/10/2026 às 23:15:27 UTC**, com URL pública `https://sd-loadlab.onrender.com`.
 
-1. Código versionado e enviado ao GitHub.
-2. Criação de um Web Service no Render conectado ao repositório, com runtime Docker.
-3. O Render executa o build da imagem a partir do Dockerfile e publica o container com HTTPS automático.
-4. A cada `git push`, um novo deploy é feito automaticamente (deploy contínuo).
+O Gunicorn iniciou em `0.0.0.0:10000`, com dois workers do tipo `gthread`. Embora o Render tenha definido `WEB_CONCURRENCY=1`, a opção explícita `--workers 2` prevaleceu. O arquivo `render.yaml` especifica runtime Docker, plano Free e health check `/`.
 
-[INSERIR PRINT: painel do Render com status "Live" + navegador acessando a URL]
+**Validação:** o build Docker local e os nove testes automatizados passaram; `pip check` não encontrou conflitos de dependências. Na URL pública, `/`, `/items`, `/items/1` e `/cpu?n=20000` retornaram HTTP 200; `/items/51` retornou 404 e `/cpu?n=abc`, 400. A listagem retornou os 50 produtos esperados.
+
+A Figura 3 confirma o serviço Live, o plano Free e a URL pública no painel do Render.
 
 ## 5. Dificuldades e soluções
-- [Ex.: porta fixa causava falha no health check do Render → passamos a usar `${PORT}`.]
-- [Ex.: serviço do plano gratuito hiberna após inatividade → acesso prévio antes dos testes (cold start).]
+- **Validação da carga:** o código inicial convertia `n` sem tratar entradas inválidas e não limitava o trabalho solicitado. Foram adicionados tratamento de erro e limites, com resposta JSON e HTTP 400. Isso reduz o custo por requisição, mas não substitui rate limiting.
+- **Publicação inicial:** a primeira tentativa de commit não tinha arquivos preparados; foi resolvida com `git add`. O primeiro push exigiu configurar o upstream com `git push -u origin main`.
+- **Operação no PaaS:** a porta é obtida de `PORT`, o Gunicorn é iniciado com `exec` e os logs vão para stdout/stderr. Essas escolhas facilitam inicialização, encerramento e diagnóstico no ambiente hospedado.
 
 ## 6. Conclusão
-[Após a execução, descrever as evidências de portabilidade da imagem e os resultados do deploy. Docker padroniza runtime e dependências, mas não torna hardware ou rede idênticos entre ambientes.]
+Foi possível construir e executar a aplicação localmente com Docker e publicá-la no Render, com as rotas verificadas por HTTP. O container padroniza runtime e dependências, mas não torna hardware ou rede idênticos entre ambientes. O PaaS simplificou a publicação com HTTPS, enquanto Gunicorn e logs de execução forneceram a base operacional. A aplicação é um laboratório stateless, sem banco de dados real, adequado aos testes de carga da Prática 2.
+
+## Evidências de execução
+
+![Build Docker concluído](03-docker-build.png)
+
+*Figura 1 — Build local da imagem `sd-loadlab`, concluído com sucesso.*
+
+![Resposta HTTP do container local](04-docker-local.png)
+
+*Figura 2 — Requisição a `127.0.0.1:8000`, com HTTP 200, servidor Gunicorn e status `ok`.*
+
+![Serviço Live no Render](01-render-live.png)
+
+*Figura 3 — Serviço `sd-loadlab` no Render: Docker, plano Free, status Live e URL pública.*

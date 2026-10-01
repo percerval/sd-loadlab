@@ -1,0 +1,6 @@
+[2026-10-01 20:23:05,084] debian/INFO/locust.main: Starting Locust 2.46.6
+[2026-10-01 20:23:05,084] debian/INFO/locust.main: Run time limit set to 120 seconds
+[2026-10-01 20:23:05,084] debian/INFO/locust.runners: Ramping to 50 users at a rate of 5.00 per second
+[2026-10-01 20:23:14,106] debian/INFO/locust.runners: All users spawned: {"UsuarioAPI": 50} (50 total users)
+[2026-10-01 20:25:04,960] debian/INFO/locust.main: --run-time limit reached, shutting down
+[2026-10-01 20:25:05,010] debian/INFO/locust.main: Shutting down (exit code 0)
